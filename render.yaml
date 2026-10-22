@@ -1,0 +1,47 @@
+# ==========================================
+# Render Blueprint Specification for Mailroom
+# https://render.com/docs/blueprint-spec
+# ==========================================
+
+services:
+  - type: web
+    name: mailroom-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter # or free
+    region: oregon # or frankfurt, singapore, ohio
+    healthCheckPath: /health
+    autoDeploy: true
+
+    envVars:
+      # Database connection (Use Render Managed Postgres or external e.g. Supabase/Neon)
+      - key: DATABASE_URL
+        sync: false
+      - key: LANGGRAPH_DATABASE_URL
+        sync: false
+
+      # Google Gemini API Key
+      - key: GOOGLE_API_KEY
+        sync: false
+
+      # Symmetric encryption key for stored Gmail OAuth tokens (Fernet 32-byte base64)
+      - key: EMAIL_TOKEN_ENCRYPTION_KEY
+        sync: false
+
+      # App secret key for signed session cookies and OAuth CSRF validation
+      - key: APP_SECRET_KEY
+        sync: false
+
+      # Google Cloud OAuth 2.0 Web Client credentials
+      - key: client_id
+        sync: false
+      - key: client_secret
+        sync: false
+
+      # OAuth Redirect URI (e.g. https://<your-service>.onrender.com/integrations/gmail/callback)
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+
+      # Frontend Web URL for redirecting after OAuth (e.g. https://<your-frontend>.onrender.com)
+      - key: FRONTEND_URL
+        sync: false

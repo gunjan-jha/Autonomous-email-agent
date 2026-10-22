@@ -5,6 +5,8 @@ import EmailDetail from './components/EmailDetail';
 import SimulationModal from './components/SimulationModal';
 import ToastContainer from './components/ToastContainer';
 import GmailHome from './components/GmailHome';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -15,15 +17,30 @@ export default function App() {
   const [polling, setPolling] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // View mode: 'home' (Jotform landing & Gmail connect) | 'console' (3-column inbox review)
+  // View mode: 'home' | 'console' | 'privacy' | 'terms'
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash;
     const params = new URLSearchParams(window.location.search);
+    if (hash === '#privacy' || params.get('view') === 'privacy') return 'privacy';
+    if (hash === '#terms' || params.get('view') === 'terms') return 'terms';
     if (hash === '#console' || params.get('view') === 'console' || params.get('connected') === 'true') {
       return 'console';
     }
     return 'home';
   });
+
+  // Listen to browser hash changes (#privacy, #terms, #home, #console)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#privacy') setCurrentView('privacy');
+      else if (hash === '#terms') setCurrentView('terms');
+      else if (hash === '#home') setCurrentView('home');
+      else if (hash === '#console') setCurrentView('console');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const [connectedAccounts, setConnectedAccounts] = useState([]);
   
@@ -96,6 +113,10 @@ export default function App() {
           addToast('Gmail connected successfully! Welcome to the email console.', 'success');
           window.history.replaceState({}, document.title, window.location.pathname);
           setCurrentView('console');
+        } else if (hash === '#privacy' || params.get('view') === 'privacy') {
+          setCurrentView('privacy');
+        } else if (hash === '#terms' || params.get('view') === 'terms') {
+          setCurrentView('terms');
         } else if (accounts.length > 0) {
           // If email is connected, default to console unless user explicitly visited #home
           if (hash !== '#home' && params.get('view') !== 'home') {
@@ -106,7 +127,10 @@ export default function App() {
           setCurrentView('home');
         }
       } else {
-        setCurrentView('home');
+        const hash = window.location.hash;
+        if (hash === '#privacy') setCurrentView('privacy');
+        else if (hash === '#terms') setCurrentView('terms');
+        else setCurrentView('home');
       }
     } catch (err) {
       console.warn('Could not check connected accounts:', err);
@@ -445,6 +469,46 @@ export default function App() {
     setMobileDetailOpen(true);
   };
 
+  if (currentView === 'privacy') {
+    return (
+      <>
+        <PrivacyPolicy
+          onBack={() => {
+            window.location.hash = connectedAccounts.length > 0 ? '#console' : '#home';
+            setCurrentView(connectedAccounts.length > 0 ? 'console' : 'home');
+          }}
+          onNavigateTerms={() => {
+            window.location.hash = '#terms';
+            setCurrentView('terms');
+          }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      </>
+    );
+  }
+
+  if (currentView === 'terms') {
+    return (
+      <>
+        <TermsOfService
+          onBack={() => {
+            window.location.hash = connectedAccounts.length > 0 ? '#console' : '#home';
+            setCurrentView(connectedAccounts.length > 0 ? 'console' : 'home');
+          }}
+          onNavigatePrivacy={() => {
+            window.location.hash = '#privacy';
+            setCurrentView('privacy');
+          }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      </>
+    );
+  }
+
   if (currentView === 'home') {
     return (
       <>
@@ -461,6 +525,14 @@ export default function App() {
           isPolling={polling}
           onSimulateEmail={handleRunSimulation}
           addToast={addToast}
+          onNavigatePrivacy={() => {
+            window.location.hash = '#privacy';
+            setCurrentView('privacy');
+          }}
+          onNavigateTerms={() => {
+            window.location.hash = '#terms';
+            setCurrentView('terms');
+          }}
         />
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       </>
@@ -489,6 +561,14 @@ export default function App() {
         isPolling={polling}
         onTestEmail={() => setShowSimModal(true)}
         onGoHome={() => setCurrentView('home')}
+        onNavigatePrivacy={() => {
+          window.location.hash = '#privacy';
+          setCurrentView('privacy');
+        }}
+        onNavigateTerms={() => {
+          window.location.hash = '#terms';
+          setCurrentView('terms');
+        }}
         connectedAccount={connectedAccounts[0] || null}
         onDisconnect={handleDisconnectAccount}
       />

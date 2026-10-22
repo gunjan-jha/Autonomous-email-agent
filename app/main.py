@@ -58,8 +58,26 @@ def process_email_api(
     result = process_email(email_data, db)
     return result
 
+@app.get("/privacy")
+def privacy_policy():
+    """Redirect to frontend Privacy Policy page for Google verification compliance."""
+    from fastapi.responses import RedirectResponse
+    base_fe = os.environ.get("FRONTEND_URL", "http://localhost:5173").split("?")[0].rstrip("/")
+    return RedirectResponse(f"{base_fe}/#privacy", status_code=302)
+
+@app.get("/terms")
+def terms_of_service():
+    """Redirect to frontend Terms of Service page for Google verification compliance."""
+    from fastapi.responses import RedirectResponse
+    base_fe = os.environ.get("FRONTEND_URL", "http://localhost:5173").split("?")[0].rstrip("/")
+    return RedirectResponse(f"{base_fe}/#terms", status_code=302)
+
 @app.on_event("startup")
 def startup():
+    from app.db.database import Base, engine
+    import app.db.models.email
+    import app.db.models.email_account
+    Base.metadata.create_all(bind=engine)
     ensure_checkpointer_ready()
 
 @app.on_event("shutdown")

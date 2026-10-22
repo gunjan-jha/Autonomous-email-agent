@@ -28,6 +28,8 @@ export default function Sidebar({
   isPolling,
   onTestEmail,
   onGoHome,
+  onNavigatePrivacy,
+  onNavigateTerms,
   connectedAccount,
   onDisconnect
 }) {
@@ -188,6 +190,24 @@ export default function Sidebar({
           <Sparkles size={12} />
           <span>Test Inbound Email</span>
         </button>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
+          <button
+            onClick={onNavigatePrivacy}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '11px', cursor: 'pointer', padding: 0 }}
+            title="View Privacy Policy"
+          >
+            Privacy
+          </button>
+          <span>•</span>
+          <button
+            onClick={onNavigateTerms}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '11px', cursor: 'pointer', padding: 0 }}
+            title="View Terms of Service"
+          >
+            Terms
+          </button>
+        </div>
       </div>
     </aside>
   );

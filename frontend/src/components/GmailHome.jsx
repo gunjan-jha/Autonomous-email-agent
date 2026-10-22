@@ -30,7 +30,9 @@ export default function GmailHome({
   onTriggerPoll,
   isPolling,
   onSimulateEmail,
-  addToast
+  addToast,
+  onNavigatePrivacy,
+  onNavigateTerms,
 }) {
   const [connectedAccounts, setConnectedAccounts] = useState([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
@@ -826,6 +828,38 @@ export default function GmailHome({
               <span>The smart, human-approved AI email assistant for Gmail</span>
             </div>
           </div>
+
+          <div className="footer-links-row" style={{ display: 'flex', gap: '16px', margin: '14px 0', fontSize: '13px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={onNavigatePrivacy}
+              id="footer-link-privacy"
+              className="btn-legal-link"
+              style={{ padding: 0 }}
+            >
+              Privacy Policy
+            </button>
+            <span style={{ color: 'var(--border)' }}>•</span>
+            <button
+              onClick={onNavigateTerms}
+              id="footer-link-terms"
+              className="btn-legal-link"
+              style={{ padding: 0 }}
+            >
+              Terms of Service
+            </button>
+            <span style={{ color: 'var(--border)' }}>•</span>
+            <a
+              href="https://developers.google.com/terms/api-services-user-data-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-legal-link"
+              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+            >
+              <span>Google Limited Use Policy</span>
+              <span style={{ fontSize: '11px' }}>↗</span>
+            </a>
+          </div>
+
           <div className="footer-bottom">
             <p className="copyright">
               © {new Date().getFullYear()} Mailroom. All rights reserved.
