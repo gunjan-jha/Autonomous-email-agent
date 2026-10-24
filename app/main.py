@@ -23,6 +23,8 @@ allowed_origins = [
 frontend_env = os.environ.get("FRONTEND_URL")
 if frontend_env:
     clean_url = frontend_env.split("?")[0].rstrip("/")
+    if clean_url and not clean_url.startswith(("http://", "https://")):
+        clean_url = f"https://{clean_url}"
     if clean_url and clean_url not in allowed_origins:
         allowed_origins.append(clean_url)
 

@@ -4,6 +4,9 @@
 # ==========================================
 
 services:
+  # ------------------------------------------
+  # 1. FastAPI + LangGraph Backend Web Service
+  # ------------------------------------------
   - type: web
     name: mailroom-api
     runtime: docker
@@ -42,6 +45,25 @@ services:
       - key: GOOGLE_REDIRECT_URI
         sync: false
 
-      # Frontend Web URL for redirecting after OAuth (e.g. https://<your-frontend>.onrender.com)
+      # Frontend Web URL for redirecting after OAuth (e.g. https://<your-frontend>.onrender.com or Netlify URL)
       - key: FRONTEND_URL
+        sync: false
+
+  # ------------------------------------------
+  # 2. React + Vite Frontend Static Site (Free on Render)
+  # ------------------------------------------
+  - type: web
+    name: mailroom-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    envVars:
+      # Production Backend API URL (e.g. https://mailroom-api.onrender.com)
+      - key: VITE_API_BASE
         sync: false

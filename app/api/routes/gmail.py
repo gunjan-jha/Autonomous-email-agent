@@ -30,25 +30,36 @@ serializer= URLSafeTimedSerializer(
 )
 
 
+def _is_production() -> bool:
+    frontend_url = os.environ.get("FRONTEND_URL", "")
+    return bool(
+        os.environ.get("RENDER")
+        or os.environ.get("ENVIRONMENT") == "production"
+        or frontend_url.startswith("https://")
+        or "netlify.app" in frontend_url
+    )
+
+
 @gmail_router.get("/connect")
 def connect_gmail():
-    flow =create_oauth_flow()
-    authorization_url ,state = flow.authorization_url(
-        acess_type="offline",
+    flow = create_oauth_flow()
+    authorization_url, state = flow.authorization_url(
+        access_type="offline",
         prompt="consent",
         include_granted_scopes="true"
     )
     response = RedirectResponse(authorization_url)
+    is_prod = _is_production()
     response.set_cookie(
-    key="gmail_oauth_state",
-    value=serializer.dumps({
-        "state": state,
-        "code_verifier": flow.code_verifier,
-    }),
-    httponly=True,
-    secure=False,  # Local development only
-    samesite="lax",
-    max_age=600,
+        key="gmail_oauth_state",
+        value=serializer.dumps({
+            "state": state,
+            "code_verifier": flow.code_verifier,
+        }),
+        httponly=True,
+        secure=is_prod,
+        samesite="none" if is_prod else "lax",
+        max_age=600,
     )
     return response
 
@@ -149,20 +160,27 @@ def gmail_callback(
         "FRONTEND_URL",
         "http://localhost:5173/?connected=true&view=console"
     )
+    if frontend_url and not frontend_url.startswith(("http://", "https://")):
+        frontend_url = f"https://{frontend_url}"
     response = RedirectResponse(
         url=frontend_url,
         status_code=303,
     )
+    is_prod = _is_production()
     response.set_cookie(
         key="session_token",
         value=session_token,
         httponly=True,
-        secure=False, 
-        samesite="lax",
-        max_age=60*60*24*30,
+        secure=is_prod,
+        samesite="none" if is_prod else "lax",
+        max_age=60 * 60 * 24 * 30,
     )
-    #clean up the temporary state cookie
-    response.delete_cookie("gmail_oauth_state")
+    # Clean up the temporary state cookie
+    response.delete_cookie(
+        "gmail_oauth_state",
+        secure=is_prod,
+        samesite="none" if is_prod else "lax",
+    )
     return response
 
 @gmail_router.get("/accounts")

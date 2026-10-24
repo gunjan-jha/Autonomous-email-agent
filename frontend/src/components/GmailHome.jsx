@@ -25,7 +25,7 @@ import {
 import './GmailHome.css';
 
 export default function GmailHome({
-  apiBase = 'http://localhost:8000',
+  apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000',
   onOpenConsole,
   onTriggerPoll,
   isPolling,
@@ -80,6 +80,13 @@ export default function GmailHome({
   }, [onOpenConsole]);
 
   const handleConnectGmail = () => {
+    if (!import.meta.env.VITE_API_BASE && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      if (addToast) {
+        addToast('Missing VITE_API_BASE in Netlify settings. Please set VITE_API_BASE to your backend URL and trigger a redeploy.', 'error');
+      }
+      console.error('[Mailroom] VITE_API_BASE is missing. Configure VITE_API_BASE=https://<your-backend>.onrender.com in Netlify and redeploy.');
+      return;
+    }
     if (addToast) addToast('Redirecting to Google secure sign-in...', 'info');
     window.location.href = `${apiBase}/integrations/gmail/connect`;
   };

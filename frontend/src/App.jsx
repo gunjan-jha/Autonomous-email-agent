@@ -8,7 +8,7 @@ import GmailHome from './components/GmailHome';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 export default function App() {
   const [emails, setEmails] = useState([]);
